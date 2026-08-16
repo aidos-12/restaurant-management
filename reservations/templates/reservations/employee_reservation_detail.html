@@ -1,0 +1,317 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Бронь №{{ reservation.id }}
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'users/style.css' %}"
+    >
+
+</head>
+
+
+<body class="staff-body">
+
+
+<header class="staff-header">
+
+    <div class="staff-header-container">
+
+        <a
+            href="{% url 'employee_orders' %}"
+            class="staff-logo"
+        >
+            RESTAURANT
+
+            <span>
+                STAFF PANEL
+            </span>
+
+        </a>
+
+
+        <nav class="staff-nav">
+
+            <a href="{% url 'employee_orders' %}">
+                Заказы
+            </a>
+
+            <a
+                href="{% url 'employee_reservations' %}"
+                class="active"
+            >
+                Брони
+            </a>
+
+            <a href="{% url 'logout' %}">
+                Выйти
+            </a>
+
+        </nav>
+
+    </div>
+
+</header>
+
+
+<main class="staff-page">
+
+    <div class="staff-container">
+
+
+        <a
+            href="{% url 'employee_reservations' %}"
+            class="back-link"
+        >
+            ← Все бронирования
+        </a>
+
+
+        <div class="staff-order-detail">
+
+
+            <div class="staff-order-title">
+
+                <h1>
+                    Бронь №{{ reservation.id }}
+                </h1>
+
+                <span class="order-status large">
+                    {{ reservation.get_status_display }}
+                </span>
+
+            </div>
+
+
+            <!-- ИНФОРМАЦИЯ -->
+
+            <div class="order-section">
+
+                <p class="section-title">
+                    КЛИЕНТ
+                </p>
+
+                <h2>
+                    {{ reservation.customer.username }}
+                </h2>
+
+                {% if reservation.customer.email %}
+
+                    <p>
+                        {{ reservation.customer.email }}
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="order-section">
+
+                <p class="section-title">
+                    БРОНИРОВАНИЕ
+                </p>
+
+
+                <div class="order-meta">
+
+                    <div>
+
+                        <span>
+                            СТОЛИК
+                        </span>
+
+                        <strong>
+                            №{{ reservation.table.number }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            ДАТА
+                        </span>
+
+                        <strong>
+                            {{ reservation.date }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            ВРЕМЯ
+                        </span>
+
+                        <strong>
+                            {{ reservation.time }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            ГОСТЕЙ
+                        </span>
+
+                        <strong>
+                            {{ reservation.guests }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            {% if reservation.comment %}
+
+                <div class="order-section">
+
+                    <p class="section-title">
+                        КОММЕНТАРИЙ
+                    </p>
+
+                    <p>
+                        {{ reservation.comment }}
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- СТАТУС -->
+
+            <div class="order-section">
+
+                <p class="section-title">
+                    ИЗМЕНИТЬ СТАТУС
+                </p>
+
+
+                <div class="status-actions">
+
+
+                    <form
+                        method="post"
+                        action="{% url 'update_reservation_status' reservation.id %}"
+                    >
+
+                        {% csrf_token %}
+
+                        <input
+                            type="hidden"
+                            name="status"
+                            value="confirmed"
+                        >
+
+                        <button
+                            type="submit"
+                            class="status-button primary"
+                        >
+                            Подтвердить
+                        </button>
+
+                    </form>
+
+
+                    <form
+                        method="post"
+                        action="{% url 'update_reservation_status' reservation.id %}"
+                    >
+
+                        {% csrf_token %}
+
+                        <input
+                            type="hidden"
+                            name="status"
+                            value="completed"
+                        >
+
+                        <button
+                            type="submit"
+                            class="status-button"
+                        >
+                            Завершить
+                        </button>
+
+                    </form>
+
+
+                    <form
+                        method="post"
+                        action="{% url 'update_reservation_status' reservation.id %}"
+                    >
+
+                        {% csrf_token %}
+
+                        <input
+                            type="hidden"
+                            name="status"
+                            value="cancelled"
+                        >
+
+                        <button
+                            type="submit"
+                            class="status-button danger"
+                        >
+                            Отменить
+                        </button>
+
+                    </form>
+
+
+                </div>
+
+            </div>
+
+
+            <div class="order-meta">
+
+                <div>
+
+                    <span>
+                        СОЗДАНО
+                    </span>
+
+                    <strong>
+                        {{ reservation.created_at }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</main>
+
+
+</body>
+
+</html>

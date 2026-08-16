@@ -1,0 +1,274 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Бронирования — Сотрудник</title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'users/style.css' %}"
+    >
+
+</head>
+
+<body>
+
+<header class="header">
+
+    <div class="header-container">
+
+        <a href="{% url 'employee_orders' %}" class="logo">
+            RESTAURANT
+        </a>
+
+        <nav class="nav">
+
+            <a href="{% url 'employee_orders' %}">
+                Заказы
+            </a>
+
+            <a href="{% url 'employee_reservations' %}">
+                Бронирования
+            </a>
+
+            <a href="{% url 'logout' %}" class="nav-button">
+                Выйти
+            </a>
+
+        </nav>
+
+    </div>
+
+</header>
+
+
+<main class="reservation-page">
+
+    <div class="reservation-container">
+
+        <p class="section-label">
+            STAFF PANEL
+        </p>
+
+        <h1>
+            Бронирования
+        </h1>
+
+
+        {% if reservations %}
+
+            {% for reservation in reservations %}
+
+                <div class="reservation-card">
+
+                    <div class="reservation-header">
+
+                        <h2>
+                            Бронь №{{ reservation.id }}
+                        </h2>
+
+                        <span>
+                            {{ reservation.get_status_display }}
+                        </span>
+
+                    </div>
+
+
+                    <p>
+                        <strong>Клиент:</strong>
+                        {{ reservation.customer.username }}
+                    </p>
+
+                    <p>
+                        <strong>Столик:</strong>
+                        №{{ reservation.table.number }}
+                    </p>
+
+                    <p>
+                        <strong>Дата:</strong>
+                        {{ reservation.date }}
+                    </p>
+
+                    <p>
+                        <strong>Время:</strong>
+                        {{ reservation.time }}
+                    </p>
+
+                    <p>
+                        <strong>Гостей:</strong>
+                        {{ reservation.guests }}
+                    </p>
+
+
+                    {% if reservation.comment %}
+
+                        <p>
+                            <strong>Комментарий:</strong>
+                            {{ reservation.comment }}
+                        </p>
+
+                    {% endif %}
+
+
+                    <!-- ДЕЙСТВИЯ СОТРУДНИКА -->
+
+                    <div class="reservation-actions">
+
+
+                        {% if reservation.status == 'pending' %}
+
+                            <!-- Подтвердить -->
+
+                            <form
+                                method="post"
+                                action="{% url 'update_reservation_status' reservation.id %}"
+                            >
+
+                                {% csrf_token %}
+
+                                <input
+                                    type="hidden"
+                                    name="status"
+                                    value="confirmed"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="status-button confirm-button"
+                                >
+                                    Подтвердить
+                                </button>
+
+                            </form>
+
+
+                            <!-- Отменить -->
+
+                            <form
+                                method="post"
+                                action="{% url 'update_reservation_status' reservation.id %}"
+                            >
+
+                                {% csrf_token %}
+
+                                <input
+                                    type="hidden"
+                                    name="status"
+                                    value="cancelled"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="status-button cancel-button"
+                                >
+                                    Отменить
+                                </button>
+
+                            </form>
+
+
+                        {% elif reservation.status == 'confirmed' %}
+
+
+                            <!-- Завершить -->
+
+                            <form
+                                method="post"
+                                action="{% url 'update_reservation_status' reservation.id %}"
+                            >
+
+                                {% csrf_token %}
+
+                                <input
+                                    type="hidden"
+                                    name="status"
+                                    value="completed"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="status-button complete-button"
+                                >
+                                    Завершить
+                                </button>
+
+                            </form>
+
+
+                            <!-- Отменить -->
+
+                            <form
+                                method="post"
+                                action="{% url 'update_reservation_status' reservation.id %}"
+                            >
+
+                                {% csrf_token %}
+
+                                <input
+                                    type="hidden"
+                                    name="status"
+                                    value="cancelled"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="status-button cancel-button"
+                                >
+                                    Отменить
+                                </button>
+
+                            </form>
+
+
+                        {% elif reservation.status == 'completed' %}
+
+                            <p class="status-message">
+                                Бронирование завершено
+                            </p>
+
+
+                        {% elif reservation.status == 'cancelled' %}
+
+                            <p class="status-message">
+                                Бронирование отменено
+                            </p>
+
+                        {% endif %}
+
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <h2>
+                    Бронирований пока нет
+                </h2>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</main>
+
+</body>
+
+</html>

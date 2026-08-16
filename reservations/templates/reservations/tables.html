@@ -1,0 +1,270 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Столики — Restaurant</title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'users/style.css' %}"
+    >
+
+</head>
+
+
+<body>
+
+
+<header class="header">
+
+    <div class="header-container">
+
+        <a
+            href="{% url 'home' %}"
+            class="logo"
+        >
+            RESTAURANT
+        </a>
+
+
+        <nav class="nav">
+
+            <a href="{% url 'home' %}">
+                Главная
+            </a>
+
+            <a href="{% url 'menu' %}">
+                Меню
+            </a>
+
+            <a href="{% url 'cart' %}">
+                Корзина
+            </a>
+
+
+            {% if user.is_authenticated %}
+
+                <a href="{% url 'profile' %}">
+                    Кабинет
+                </a>
+
+                <a href="{% url 'order_history' %}">
+                    Заказы
+                </a>
+
+                <a href="{% url 'my_reservations' %}">
+                    Брони
+                </a>
+
+                <a
+                    href="{% url 'logout' %}"
+                    class="nav-button"
+                >
+                    Выйти
+                </a>
+
+            {% else %}
+
+                <a href="{% url 'login' %}">
+                    Войти
+                </a>
+
+                <a
+                    href="{% url 'register' %}"
+                    class="nav-button"
+                >
+                    Регистрация
+                </a>
+
+            {% endif %}
+
+        </nav>
+
+    </div>
+
+</header>
+
+
+<main class="tables-page">
+
+    <div class="tables-container">
+
+
+        <!-- INTRO -->
+
+        <div class="tables-intro">
+
+            <p class="section-label">
+                RESERVATION
+            </p>
+
+            <h1>
+                Забронировать столик
+            </h1>
+
+            <p>
+                Выберите подходящий столик
+                для вашего вечера.
+            </p>
+
+        </div>
+
+
+        <!-- TABLES -->
+
+        {% if tables %}
+
+
+            <div class="tables-grid">
+
+
+                {% for table in tables %}
+
+    <div class="table-card">
+
+        <span>
+            №{{ table.number }}
+        </span>
+
+        <h2>
+            Столик №{{ table.number }}
+        </h2>
+
+        <p>
+            {{ table.seats }} мест
+        </p>
+
+        {% if user.is_authenticated %}
+
+            <a
+                href="{% url 'reservation_create' table.id %}"
+                class="button button-primary"
+            >
+                Выбрать столик
+            </a>
+
+        {% endif %}
+
+    </div>
+
+{% empty %}
+                            <p class="table-description">
+                                Подходит для
+                                {{ table.seats }}
+                                {% if table.seats == 1 %}
+                                    гостя
+                                {% elif table.seats < 5 %}
+                                    гостей
+                                {% else %}
+                                    гостей
+                                {% endif %}
+                            </p>
+
+
+                        </div>
+
+
+
+                    </article>
+
+
+                {% endfor %}
+
+
+            </div>
+
+
+        {% else %}
+
+
+            <div class="tables-empty">
+
+                <h2>
+                    Свободных столиков пока нет
+                </h2>
+
+                <p>
+                    Попробуйте проверить позже
+                    или выберите другую дату.
+                </p>
+
+            </div>
+
+
+        {% endif %}
+
+
+        <!-- BOTTOM -->
+
+        <div class="tables-bottom">
+
+            <a
+                href="{% url 'home' %}"
+                class="tables-back"
+            >
+                ← Вернуться на главную
+            </a>
+
+
+            {% if user.is_authenticated %}
+
+                <a
+                    href="{% url 'my_reservations' %}"
+                    class="tables-my"
+                >
+                    Мои бронирования →
+                </a>
+
+            {% endif %}
+
+        </div>
+
+
+    </div>
+
+</main>
+
+
+<footer class="footer">
+
+    <div class="footer-container">
+
+        <div>
+
+            <strong>
+                RESTAURANT
+            </strong>
+
+            <p>
+                European cuisine &amp; atmosphere
+            </p>
+
+        </div>
+
+
+        <div>
+
+            <p>
+                © 2026 RESTAURANT
+            </p>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+</body>
+
+</html>

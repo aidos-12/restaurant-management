@@ -1,0 +1,116 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Restaurant</title>
+
+    <link rel="stylesheet" href="{% static 'menu/style.css' %}">
+</head>
+
+<body>
+
+<header class="header">
+
+    <div class="logo">
+        RESTAURANT
+    </div>
+
+    <nav>
+        <a href="/">Главная</a>
+        <a href="{% url 'menu' %}">Меню</a>
+        <a href="{% url 'cart' %}">🛒 Корзина</a>
+    </nav>
+
+</header>
+
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <p class="hero-subtitle">
+            ДОБРО ПОЖАЛОВАТЬ
+        </p>
+
+        <h1>
+            Вкус, который<br>
+            хочется повторить
+        </h1>
+
+        <p class="hero-text">
+            Свежие блюда, качественные продукты
+            и приятная атмосфера для каждого гостя.
+        </p>
+
+        <a href="{% url 'menu' %}" class="hero-button">
+            Посмотреть меню
+        </a>
+
+    </div>
+
+</section>
+
+
+<section class="about">
+
+    <h2>Наш ресторан</h2>
+
+    <p>
+        Мы создаём простую и вкусную еду из качественных продуктов.
+        Здесь можно встретиться с друзьями, провести вечер с семьёй
+        или просто вкусно поужинать.
+    </p>
+
+</section>
+
+
+<section class="categories">
+
+    <h2>Наше меню</h2>
+
+    <div class="category-grid">
+
+        <div class="category-card">
+            <span>☕</span>
+            <h3>Напитки</h3>
+            <p>Кофе, чай, лимонады и другие напитки.</p>
+        </div>
+
+        <div class="category-card">
+            <span>🥗</span>
+            <h3>Закуски</h3>
+            <p>Лёгкие блюда для начала вашего ужина.</p>
+        </div>
+
+        <div class="category-card">
+            <span>🍝</span>
+            <h3>Основные блюда</h3>
+            <p>Сытные блюда для настоящего обеда.</p>
+        </div>
+
+        <div class="category-card">
+            <span>🍰</span>
+            <h3>Десерты</h3>
+            <p>Сладкое завершение вашего вечера.</p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<footer class="footer">
+
+    <p>
+        © 2026 RESTAURANT
+    </p>
+
+</footer>
+
+</body>
+</html>

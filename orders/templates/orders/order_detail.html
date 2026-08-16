@@ -1,0 +1,411 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Заказ №{{ order.id }} — Staff
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'users/style.css' %}"
+    >
+
+</head>
+
+<body class="staff-body">
+
+
+<header class="staff-header">
+
+    <div class="staff-header-container">
+
+        <a
+            href="{% url 'employee_orders' %}"
+            class="staff-logo"
+        >
+            RESTAURANT
+
+            <span>
+                STAFF
+            </span>
+        </a>
+
+
+        <nav class="staff-nav">
+
+            <a
+                href="{% url 'employee_orders' %}"
+                class="active"
+            >
+                Заказы
+            </a>
+
+            <a href="{% url 'employee_reservations' %}">
+                Бронирования
+            </a>
+
+            <a href="{% url 'menu' %}">
+                Меню
+            </a>
+
+            <a href="{% url 'logout' %}">
+                Выйти
+            </a>
+
+        </nav>
+
+    </div>
+
+</header>
+
+
+<main class="staff-page">
+
+
+    <div class="staff-container">
+
+
+        <a
+            href="{% url 'employee_orders' %}"
+            class="back-link"
+        >
+            ← Все заказы
+        </a>
+
+
+        <div class="staff-order-detail">
+
+
+            <div class="staff-order-title">
+
+                <div>
+
+                    <p class="staff-label">
+                        ORDER #{{ order.id }}
+                    </p>
+
+                    <h1>
+                        Заказ №{{ order.id }}
+                    </h1>
+
+                </div>
+
+
+                <span class="order-status large">
+                    {{ order.get_status_display }}
+                </span>
+
+            </div>
+
+
+            <!-- КЛИЕНТ -->
+
+            <section class="order-section">
+
+                <p class="section-title">
+                    КЛИЕНТ
+                </p>
+
+                <h2>
+                    {{ order.customer.username }}
+                </h2>
+
+                {% if order.customer.email %}
+
+                    <p>
+                        {{ order.customer.email }}
+                    </p>
+
+                {% endif %}
+
+            </section>
+
+
+            <!-- ТОВАРЫ -->
+
+            <section class="order-section">
+
+                <p class="section-title">
+                    СОСТАВ ЗАКАЗА
+                </p>
+
+
+                <div class="staff-order-items">
+
+                    {% for item in order.items.all %}
+
+                        <div class="staff-order-item">
+
+                            <div>
+
+                                <h3>
+                                    {{ item.product.name }}
+                                </h3>
+
+                                <p>
+                                    {{ item.price }} ₸ ×
+                                    {{ item.quantity }}
+                                </p>
+
+                            </div>
+
+
+                            <strong>
+                                {{ item.subtotal }} ₸
+                            </strong>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </section>
+
+
+            <!-- ИТОГ -->
+
+            <section class="order-total-section">
+
+                <span>
+                    Итого
+                </span>
+
+                <strong>
+                    {{ order.total }} ₸
+                </strong>
+
+            </section>
+
+
+            <!-- СТАТУС -->
+
+            <section class="order-section">
+
+                <p class="section-title">
+                    СТАТУС ЗАКАЗА
+                </p>
+
+
+                <div class="status-actions">
+
+
+                    {% if order.status == 'new' %}
+
+                        <form
+                            method="post"
+                            action="{% url 'update_order_status' order.id %}"
+                        >
+
+                            {% csrf_token %}
+
+                            <input
+                                type="hidden"
+                                name="status"
+                                value="confirmed"
+                            >
+
+                            <button
+                                type="submit"
+                                class="status-button primary"
+                            >
+                                Подтвердить заказ
+                            </button>
+
+                        </form>
+
+
+                        <form
+                            method="post"
+                            action="{% url 'update_order_status' order.id %}"
+                        >
+
+                            {% csrf_token %}
+
+                            <input
+                                type="hidden"
+                                name="status"
+                                value="cancelled"
+                            >
+
+                            <button
+                                type="submit"
+                                class="status-button danger"
+                            >
+                                Отменить
+                            </button>
+
+                        </form>
+
+
+                    {% elif order.status == 'confirmed' %}
+
+                        <form
+                            method="post"
+                            action="{% url 'update_order_status' order.id %}"
+                        >
+
+                            {% csrf_token %}
+
+                            <input
+                                type="hidden"
+                                name="status"
+                                value="preparing"
+                            >
+
+                            <button
+                                type="submit"
+                                class="status-button primary"
+                            >
+                                Начать готовить
+                            </button>
+
+                        </form>
+
+
+                        <form
+                            method="post"
+                            action="{% url 'update_order_status' order.id %}"
+                        >
+
+                            {% csrf_token %}
+
+                            <input
+                                type="hidden"
+                                name="status"
+                                value="cancelled"
+                            >
+
+                            <button
+                                type="submit"
+                                class="status-button danger"
+                            >
+                                Отменить
+                            </button>
+
+                        </form>
+
+
+                    {% elif order.status == 'preparing' %}
+
+                        <form
+                            method="post"
+                            action="{% url 'update_order_status' order.id %}"
+                        >
+
+                            {% csrf_token %}
+
+                            <input
+                                type="hidden"
+                                name="status"
+                                value="ready"
+                            >
+
+                            <button
+                                type="submit"
+                                class="status-button primary"
+                            >
+                                Заказ готов
+                            </button>
+
+                        </form>
+
+
+                    {% elif order.status == 'ready' %}
+
+                        <form
+                            method="post"
+                            action="{% url 'update_order_status' order.id %}"
+                        >
+
+                            {% csrf_token %}
+
+                            <input
+                                type="hidden"
+                                name="status"
+                                value="completed"
+                            >
+
+                            <button
+                                type="submit"
+                                class="status-button primary"
+                            >
+                                Завершить заказ
+                            </button>
+
+                        </form>
+
+
+                    {% elif order.status == 'completed' %}
+
+                        <div class="status-complete">
+                            ✓ Заказ завершён
+                        </div>
+
+
+                    {% elif order.status == 'cancelled' %}
+
+                        <div class="status-cancelled">
+                            Заказ отменён
+                        </div>
+
+                    {% endif %}
+
+
+                </div>
+
+            </section>
+
+
+            <!-- ИНФОРМАЦИЯ -->
+
+            <section class="order-meta">
+
+                <div>
+
+                    <span>
+                        Создан
+                    </span>
+
+                    <strong>
+                        {{ order.created_at }}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Обновлён
+                    </span>
+
+                    <strong>
+                        {{ order.updated_at }}
+                    </strong>
+
+                </div>
+
+            </section>
+
+
+        </div>
+
+    </div>
+
+</main>
+
+</body>
+
+</html>

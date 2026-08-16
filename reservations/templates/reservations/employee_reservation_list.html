@@ -1,0 +1,267 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Бронирования</title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'users/style.css' %}"
+    >
+
+</head>
+
+
+<body class="staff-body">
+
+
+<header class="staff-header">
+
+    <div class="staff-header-container">
+
+        <a
+            href="{% url 'employee_orders' %}"
+            class="staff-logo"
+        >
+            RESTAURANT
+
+            <span>
+                STAFF PANEL
+            </span>
+
+        </a>
+
+
+        <nav class="staff-nav">
+
+            <a href="{% url 'employee_orders' %}">
+                Заказы
+            </a>
+
+            <a
+                href="{% url 'employee_reservations' %}"
+                class="active"
+            >
+                Брони
+            </a>
+
+            <a href="{% url 'logout' %}">
+                Выйти
+            </a>
+
+        </nav>
+
+    </div>
+
+</header>
+
+
+<main class="staff-page">
+
+    <div class="staff-container">
+
+
+        <div class="staff-welcome">
+
+            <p class="staff-label">
+                RESERVATIONS
+            </p>
+
+            <h1>
+                Бронирования
+            </h1>
+
+            <p>
+                Управление бронированиями гостей.
+            </p>
+
+        </div>
+
+
+        <!-- СТАТИСТИКА -->
+
+        <div class="staff-stats">
+
+            <div class="staff-stat">
+
+                <span>
+                    ОЖИДАЮТ
+                </span>
+
+                <strong>
+                    {{ pending_count }}
+                </strong>
+
+            </div>
+
+
+            <div class="staff-stat">
+
+                <span>
+                    ПОДТВЕРЖДЕНЫ
+                </span>
+
+                <strong>
+                    {{ confirmed_count }}
+                </strong>
+
+            </div>
+
+
+            <div class="staff-stat">
+
+                <span>
+                    ЗАВЕРШЕНЫ
+                </span>
+
+                <strong>
+                    {{ completed_count }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- ФИЛЬТРЫ -->
+
+        <div class="order-filters">
+
+            <a
+                href="{% url 'employee_reservations' %}"
+                class="{% if not current_status %}active{% endif %}"
+            >
+                Все
+            </a>
+
+
+            {% for value, label in status_choices %}
+
+                <a
+                    href="?status={{ value }}"
+                    class="{% if current_status == value %}active{% endif %}"
+                >
+                    {{ label }}
+                </a>
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- БРОНИ -->
+
+        {% if reservations %}
+
+            <div class="orders-grid">
+
+                {% for reservation in reservations %}
+
+                    <div class="employee-order-card">
+
+                        <div class="order-header">
+
+                            <h2>
+                                Бронь №{{ reservation.id }}
+                            </h2>
+
+                            <span class="order-status">
+                                {{ reservation.get_status_display }}
+                            </span>
+
+                        </div>
+
+
+                        <p>
+                            Клиент:
+                            <strong>
+                                {{ reservation.customer.username }}
+                            </strong>
+                        </p>
+
+
+                        <p>
+                            Столик №{{ reservation.table.number }}
+                        </p>
+
+
+                        <p>
+                            {{ reservation.date }}
+                            — {{ reservation.time }}
+                        </p>
+
+
+                        <p>
+                            Гостей:
+                            {{ reservation.guests }}
+                        </p>
+
+
+                        {% if reservation.comment %}
+
+                            <div class="order-products">
+
+                                <p>
+                                    Комментарий:
+                                </p>
+
+                                <p>
+                                    {{ reservation.comment }}
+                                </p>
+
+                            </div>
+
+                        {% endif %}
+
+
+                        <div class="staff-order-bottom">
+
+                            <a
+                                href="{% url 'employee_reservation_detail' reservation.id %}"
+                                class="button button-primary"
+                            >
+                                Открыть бронь
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="staff-empty">
+
+                <h2>
+                    Бронирований нет
+                </h2>
+
+                <p>
+                    По выбранному фильтру ничего не найдено.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+
+    </div>
+
+</main>
+
+</body>
+
+</html>

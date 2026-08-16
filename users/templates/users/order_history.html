@@ -1,0 +1,269 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Мои заказы — Restaurant</title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'users/style.css' %}"
+    >
+
+</head>
+
+
+<body>
+
+
+<header class="header">
+
+    <div class="header-container">
+
+        <a
+            href="{% url 'home' %}"
+            class="logo"
+        >
+            RESTAURANT
+        </a>
+
+
+        <nav class="nav">
+
+            <a href="{% url 'home' %}">
+                Главная
+            </a>
+
+            <a href="{% url 'menu' %}">
+                Меню
+            </a>
+
+            <a href="{% url 'cart' %}">
+                Корзина
+            </a>
+
+            <a href="{% url 'profile' %}">
+                Кабинет
+            </a>
+
+            <a href="{% url 'order_history' %}">
+                Заказы
+            </a>
+
+            <a href="{% url 'my_reservations' %}">
+                Брони
+            </a>
+
+            <a
+                href="{% url 'logout' %}"
+                class="nav-button"
+            >
+                Выйти
+            </a>
+
+        </nav>
+
+    </div>
+
+</header>
+
+
+<main class="orders-page">
+
+    <div class="orders-container">
+
+
+        <p class="section-label">
+            MY ORDERS
+        </p>
+
+
+        <h1>
+            Мои заказы
+        </h1>
+
+
+        {% if orders %}
+
+
+            <div class="orders-list">
+
+
+                {% for order in orders %}
+
+
+                    <article class="customer-order">
+
+
+                        <!-- ВЕРХ -->
+
+                        <div class="customer-order-header">
+
+
+                            <div>
+
+                                <p class="order-number">
+                                    ЗАКАЗ №{{ order.id }}
+                                </p>
+
+                                <p class="order-date">
+                                    {{ order.created_at|date:"d.m.Y H:i" }}
+                                </p>
+
+                            </div>
+
+
+                            <span class="customer-order-status">
+
+                                {{ order.get_status_display }}
+
+                            </span>
+
+
+                        </div>
+
+
+                        <!-- ТОВАРЫ -->
+
+                        <div class="customer-order-items">
+
+
+                            {% for item in order.items.all %}
+
+
+                                <div class="customer-order-item">
+
+
+                                    <div>
+
+                                        <h3>
+                                            {{ item.product.name }}
+                                        </h3>
+
+                                        <p>
+                                            {{ item.price }} ₸ ×
+                                            {{ item.quantity }}
+                                        </p>
+
+                                    </div>
+
+
+                                    <strong>
+                                        {{ item.subtotal }} ₸
+                                    </strong>
+
+
+                                </div>
+
+
+                            {% endfor %}
+
+
+                        </div>
+
+
+                        <!-- НИЗ -->
+
+                        <div class="customer-order-footer">
+
+
+                            <span>
+                                Итого
+                            </span>
+
+
+                            <strong>
+                                {{ order.total }} ₸
+                            </strong>
+
+
+                        </div>
+
+
+                    </article>
+
+
+                {% endfor %}
+
+
+            </div>
+
+
+        {% else %}
+
+
+            <div class="empty-orders">
+
+
+                <h2>
+                    У вас пока нет заказов
+                </h2>
+
+
+                <p>
+                    Выберите блюда из меню
+                    и оформите свой первый заказ.
+                </p>
+
+
+                <a
+                    href="{% url 'menu' %}"
+                    class="button button-primary"
+                >
+                    Перейти в меню
+                </a>
+
+
+            </div>
+
+
+        {% endif %}
+
+
+    </div>
+
+</main>
+
+
+<footer class="footer">
+
+    <div class="footer-container">
+
+        <div>
+
+            <strong>
+                RESTAURANT
+            </strong>
+
+            <p>
+                European cuisine &amp; atmosphere
+            </p>
+
+        </div>
+
+
+        <div>
+
+            <p>
+                © 2026 RESTAURANT
+            </p>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+</body>
+
+</html>

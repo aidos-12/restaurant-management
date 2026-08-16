@@ -1,0 +1,269 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Панель сотрудника — Restaurant</title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'users/style.css' %}"
+    >
+
+</head>
+
+<body class="staff-body">
+
+
+<header class="staff-header">
+
+    <div class="staff-header-container">
+
+        <a
+            href="{% url 'employee_orders' %}"
+            class="staff-logo"
+        >
+            RESTAURANT
+            <span>STAFF</span>
+        </a>
+
+
+        <nav class="staff-nav">
+
+            <a
+                href="{% url 'employee_orders' %}"
+                class="active"
+            >
+                Заказы
+            </a>
+
+            <a href="{% url 'employee_reservations' %}">
+                Бронирования
+            </a>
+
+            <a href="{% url 'logout' %}">
+                Выйти
+            </a>
+
+        </nav>
+
+    </div>
+
+</header>
+
+
+<main class="staff-page">
+
+    <div class="staff-container">
+
+
+        <div class="staff-welcome">
+
+            <div>
+
+                <p class="staff-label">
+                    STAFF PANEL
+                </p>
+
+                <h1>
+                    Панель сотрудника
+                </h1>
+
+                <p>
+                    Добро пожаловать,
+                    <strong>{{ user.username }}</strong>
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- СТАТИСТИКА -->
+
+        <div class="staff-stats">
+
+            <div class="staff-stat">
+
+                <span>
+                    ВСЕ ЗАКАЗЫ
+                </span>
+
+                <strong>
+                    {{ orders|length }}
+                </strong>
+
+            </div>
+
+
+            <div class="staff-stat">
+
+                <span>
+                    НОВЫЕ
+                </span>
+
+                <strong>
+                    {{ new_orders_count }}
+                </strong>
+
+            </div>
+
+
+            <div class="staff-stat">
+
+                <span>
+                    ГОТОВЯТСЯ
+                </span>
+
+                <strong>
+                    {{ preparing_orders_count }}
+                </strong>
+
+            </div>
+
+
+            <div class="staff-stat">
+
+                <span>
+                    ГОТОВЫ
+                </span>
+
+                <strong>
+                    {{ ready_orders_count }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- ФИЛЬТР -->
+
+        <div class="order-filters">
+
+            <a
+                href="{% url 'employee_orders' %}"
+                class="{% if not current_status %}active{% endif %}"
+            >
+                Все
+            </a>
+
+
+            {% for value, label in status_choices %}
+
+                <a
+                    href="?status={{ value }}"
+                    class="{% if current_status == value %}active{% endif %}"
+                >
+                    {{ label }}
+                </a>
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- ЗАКАЗЫ -->
+
+        {% if orders %}
+
+            <div class="orders-grid">
+
+                {% for order in orders %}
+
+                    <div class="employee-order-card">
+
+                        <div class="order-header">
+
+                            <h2>
+                                Заказ №{{ order.id }}
+                            </h2>
+
+                            <span class="order-status">
+                                {{ order.get_status_display }}
+                            </span>
+
+                        </div>
+
+
+                        <p>
+                            Клиент:
+                            <strong>
+                                {{ order.customer.username }}
+                            </strong>
+                        </p>
+
+
+                        <p>
+                            {{ order.created_at }}
+                        </p>
+
+
+                        <div class="order-products">
+
+                            {% for item in order.items.all %}
+
+                                <p>
+                                    {{ item.product.name }}
+                                    × {{ item.quantity }}
+                                </p>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="staff-order-bottom">
+
+                            <strong>
+                                {{ order.total }} ₸
+                            </strong>
+
+
+                            <a
+                                href="{% url 'employee_order_detail' order.id %}"
+                                class="button button-primary"
+                            >
+                                Открыть
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="staff-empty">
+
+                <h2>
+                    Заказов нет
+                </h2>
+
+                <p>
+                    Заказов с выбранным статусом пока нет.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</main>
+
+</body>
+
+</html>
