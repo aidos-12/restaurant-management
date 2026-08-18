@@ -1,25 +1,8 @@
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
-
+from users.decorators import employee_required
 from .models import Order
 
 
-def employee_required(view_func):
-    @login_required
-    def wrapper(request, *args, **kwargs):
-
-        if not request.user.groups.filter(
-            name='Сотрудник'
-        ).exists():
-            return render(
-                request,
-                'orders/access_denied.html',
-                status=403
-            )
-
-        return view_func(request, *args, **kwargs)
-
-    return wrapper
 
 
 @employee_required

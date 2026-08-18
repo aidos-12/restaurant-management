@@ -2,6 +2,8 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 
+from users.decorators import employee_required
+
 from .forms import ReservationForm
 from .models import Table, Reservation
 
@@ -156,18 +158,8 @@ def cancel_reservation(request, reservation_id):
     )
 
 
-@login_required
+@employee_required
 def employee_reservations(request):
-
-    if not request.user.groups.filter(
-        name='Сотрудник'
-    ).exists():
-
-        return render(
-            request,
-            'reservations/access_denied.html',
-            status=403
-        )
 
     reservations = Reservation.objects.select_related(
         'customer',
@@ -187,18 +179,8 @@ def employee_reservations(request):
     )
 
 
-@login_required
+@employee_required
 def update_reservation_status(request, reservation_id):
-
-    if not request.user.groups.filter(
-        name='Сотрудник'
-    ).exists():
-
-        return render(
-            request,
-            'reservations/access_denied.html',
-            status=403
-        )
 
     reservation = get_object_or_404(
         Reservation,
@@ -235,9 +217,10 @@ def update_reservation_status(request, reservation_id):
                 reservation.status,
                 []
             ):
+
                 return render(
                     request,
-                    'reservations/access_denied.html',
+                    'users/access_denied.html',
                     {
                         'error':
                             'Недопустимый переход статуса '
