@@ -1,8 +1,10 @@
+from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
+
 from users.decorators import employee_required
+
 from .models import Order
-
-
+from .services import change_order_status
 
 
 @employee_required
@@ -40,14 +42,9 @@ def order_list(request):
             'orders': orders,
             'current_status': status,
             'status_choices': Order.Status.choices,
-
             'new_orders_count': new_orders_count,
-
-            'preparing_orders_count':
-                preparing_orders_count,
-
-            'ready_orders_count':
-                ready_orders_count,
+            'preparing_orders_count': preparing_orders_count,
+            'ready_orders_count': ready_orders_count,
         }
     )
 
@@ -85,53 +82,22 @@ def update_order_status(request, order_id):
 
         new_status = request.POST.get('status')
 
-        valid_statuses = dict(
-            Order.Status.choices
-        )
+        try:
+            change_order_status(
+                order,
+                new_status
+            )
 
-        if new_status in valid_statuses:
+        except ValidationError as error:
 
-            allowed_transitions = {
-                Order.Status.NEW: [
-                    Order.Status.CONFIRMED,
-                    Order.Status.CANCELLED,
-                ],
-
-                Order.Status.CONFIRMED: [
-                    Order.Status.PREPARING,
-                    Order.Status.CANCELLED,
-                ],
-
-                Order.Status.PREPARING: [
-                    Order.Status.READY,
-                    Order.Status.CANCELLED,
-                ],
-
-                Order.Status.READY: [
-                    Order.Status.COMPLETED,
-                ],
-
-                Order.Status.COMPLETED: [],
-
-                Order.Status.CANCELLED: [],
-            }
-
-            if new_status not in allowed_transitions.get(
-                order.status,
-                []
-            ):
-                return render(
-                    request,
-                    'orders/access_denied.html',
-                    {
-                        'error':
-                            'Недопустимый переход статуса.'
-                    },
-                    status=400
-                )
-
-            order.status = new_status
-            order.save()
+            return render(
+                request,
+                'orders/access_denied.html',
+                {
+                    'error': error.message,
+                },
+                status=400
+            )
 
     return redirect(
         'employee_order_detail',
