@@ -8,7 +8,7 @@ from django.urls import reverse
 from menu.models import Category, Product
 
 from .models import Order, OrderItem
-
+from .services import change_order_status
 
 User = get_user_model()
 
@@ -250,3 +250,137 @@ class OrderViewTests(TestCase):
             response.status_code,
             200
         )
+
+class OrderServiceTests(TestCase):
+
+    def setUp(self):
+
+        self.user = User.objects.create_user(
+            username='service_user',
+            password='test_password123'
+        )
+
+    def create_order(self, status=Order.Status.NEW):
+
+        return Order.objects.create(
+            customer=self.user,
+            status=status
+        )
+
+    def test_new_order_can_be_confirmed(self):
+
+        order = self.create_order()
+
+        change_order_status(
+            order,
+            Order.Status.CONFIRMED
+        )
+
+        order.refresh_from_db()
+
+        self.assertEqual(
+            order.status,
+            Order.Status.CONFIRMED
+        )
+
+    def test_confirmed_order_can_start_preparing(self):
+
+        order = self.create_order(
+            Order.Status.CONFIRMED
+        )
+
+        change_order_status(
+            order,
+            Order.Status.PREPARING
+        )
+
+        order.refresh_from_db()
+
+        self.assertEqual(
+            order.status,
+            Order.Status.PREPARING
+        )
+
+    def test_preparing_order_can_become_ready(self):
+
+        order = self.create_order(
+            Order.Status.PREPARING
+        )
+
+        change_order_status(
+            order,
+            Order.Status.READY
+        )
+
+        order.refresh_from_db()
+
+        self.assertEqual(
+            order.status,
+            Order.Status.READY
+        )
+
+    def test_ready_order_can_be_completed(self):
+
+        order = self.create_order(
+            Order.Status.READY
+        )
+
+        change_order_status(
+            order,
+            Order.Status.COMPLETED
+        )
+
+        order.refresh_from_db()
+
+        self.assertEqual(
+            order.status,
+            Order.Status.COMPLETED
+        )
+
+    def test_invalid_status_transition_is_rejected(self):
+
+        order = self.create_order()
+
+        with self.assertRaises(ValidationError):
+
+            change_order_status(
+                order,
+                Order.Status.READY
+            )
+
+    def test_completed_order_cannot_be_changed(self):
+
+        order = self.create_order(
+            Order.Status.COMPLETED
+        )
+
+        with self.assertRaises(ValidationError):
+
+            change_order_status(
+                order,
+                Order.Status.NEW
+            )
+
+    def test_cancelled_order_cannot_be_changed(self):
+
+        order = self.create_order(
+            Order.Status.CANCELLED
+        )
+
+        with self.assertRaises(ValidationError):
+
+            change_order_status(
+                order,
+                Order.Status.CONFIRMED
+            )
+
+    def test_unknown_status_is_rejected(self):
+
+        order = self.create_order()
+
+        with self.assertRaises(ValidationError):
+
+            change_order_status(
+                order,
+                'unknown_status'
+            )

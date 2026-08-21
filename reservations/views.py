@@ -1,11 +1,15 @@
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
+from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
 
 from users.decorators import employee_required
 
 from .forms import ReservationForm
-from .models import Table, Reservation
+from .models import Reservation, Table
+from .services import (
+    cancel_reservation as cancel_reservation_service,
+    create_reservation,
+)
 
 
 @login_required
@@ -31,34 +35,28 @@ def reservation_create(request, table_id):
 
         if form.is_valid():
 
-            with transaction.atomic():
+            try:
 
-                conflict_exists = Reservation.objects.filter(
+                reservation = create_reservation(
+                    customer=request.user,
                     table=table,
-                    date=reservation.date,
-                    time=reservation.time,
-                    status__in=[
-                        Reservation.Status.PENDING,
-                        Reservation.Status.CONFIRMED,
-                    ]
-                ).exists()
+                    date=form.cleaned_data['date'],
+                    time=form.cleaned_data['time'],
+                    guests=form.cleaned_data['guests'],
+                    comment=form.cleaned_data['comment'],
+                )
 
-                if conflict_exists:
+                return redirect(
+                    'reservation_success',
+                    reservation_id=reservation.id
+                )
 
-                    form.add_error(
-                        None,
-                        'Этот столик уже забронирован '
-                        'на выбранное время.'
-                    )
+            except ValidationError as error:
 
-                else:
-
-                    reservation.save()
-
-                    return redirect(
-                        'reservation_success',
-                        reservation_id=reservation.id
-                    )
+                form.add_error(
+                    None,
+                    error.message
+                )
 
     else:
 
@@ -143,15 +141,15 @@ def cancel_reservation(request, reservation_id):
 
     if request.method == 'POST':
 
-        cancellable_statuses = [
-            Reservation.Status.PENDING,
-            Reservation.Status.CONFIRMED,
-        ]
+        try:
 
-        if reservation.status in cancellable_statuses:
+            cancel_reservation_service(
+                reservation
+            )
 
-            reservation.status = Reservation.Status.CANCELLED
-            reservation.save()
+        except ValidationError:
+
+            pass
 
     return redirect(
         'my_reservations'
@@ -191,27 +189,27 @@ def update_reservation_status(request, reservation_id):
 
         new_status = request.POST.get('status')
 
+        allowed_transitions = {
+            Reservation.Status.PENDING: [
+                Reservation.Status.CONFIRMED,
+                Reservation.Status.CANCELLED,
+            ],
+
+            Reservation.Status.CONFIRMED: [
+                Reservation.Status.COMPLETED,
+                Reservation.Status.CANCELLED,
+            ],
+
+            Reservation.Status.COMPLETED: [],
+
+            Reservation.Status.CANCELLED: [],
+        }
+
         valid_statuses = dict(
             Reservation.Status.choices
         )
 
         if new_status in valid_statuses:
-
-            allowed_transitions = {
-                Reservation.Status.PENDING: [
-                    Reservation.Status.CONFIRMED,
-                    Reservation.Status.CANCELLED,
-                ],
-
-                Reservation.Status.CONFIRMED: [
-                    Reservation.Status.COMPLETED,
-                    Reservation.Status.CANCELLED,
-                ],
-
-                Reservation.Status.COMPLETED: [],
-
-                Reservation.Status.CANCELLED: [],
-            }
 
             if new_status not in allowed_transitions.get(
                 reservation.status,
@@ -230,7 +228,10 @@ def update_reservation_status(request, reservation_id):
                 )
 
             reservation.status = new_status
-            reservation.save()
+
+            reservation.save(
+                update_fields=['status']
+            )
 
     return redirect(
         'employee_reservations'
